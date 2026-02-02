@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Valentine?</title>
+  <style>
+    :root { --bg1:#fff1f6; --bg2:#ffe4ee; }
+    body{
+      margin:0; min-height:100vh; display:grid; place-items:center;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+      background: radial-gradient(circle at top, var(--bg1), var(--bg2));
+      color:#1f1f1f;
+    }
+    .card{
+      width:min(520px, 92vw);
+      background: rgba(255,255,255,0.75);
+      border: 1px solid rgba(0,0,0,0.08);
+      border-radius: 20px;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.08);
+      padding: 18px 18px 22px;
+      text-align:center;
+      backdrop-filter: blur(8px);
+      overflow: hidden;
+    }
+    h1{ margin:12px 0 6px; font-size: 28px; }
+    p{ margin:0 0 14px; opacity:0.8; }
+    img{
+      width: 220px; height: 220px; object-fit: cover;
+      border-radius: 18px;
+      box-shadow: 0 10px 24px rgba(0,0,0,0.12);
+    }
+    .btnRow{
+      margin-top: 18px;
+      display:flex; justify-content:center; gap:12px;
+      position: relative;
+      height: 56px;
+    }
+    button{
+      border:0; border-radius: 14px;
+      padding: 14px 18px;
+      font-size: 16px; font-weight: 650;
+      cursor:pointer;
+      transition: transform .08s ease, filter .12s ease;
+      user-select:none;
+    }
+    button:active{ transform: scale(0.98); }
+    .yes{ background:#ff2e63; color:white; box-shadow: 0 10px 18px rgba(255,46,99,0.25); }
+    .no{
+      background:#ffffff; color:#333;
+      border: 1px solid rgba(0,0,0,0.12);
+      position:absolute; left: 50%; transform: translateX(70px);
+      box-shadow: 0 10px 18px rgba(0,0,0,0.06);
+    }
+    .toast{
+      margin-top: 14px;
+      font-weight: 650;
+      opacity: 0;
+      transform: translateY(6px);
+      transition: all .2s ease;
+      min-height: 22px;
+    }
+    .toast.show{ opacity: 1; transform: translateY(0); }
+    .small{
+      margin-top: 8px; font-size: 12px; opacity: 0.55;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <img alt="cute bear" src="https://gifdb.com/images/high/cute-love-bear-roses-ou7zho5oosxnpo6k.gif" />
+
+    <h1 id="question"></h1>
+    <p>Choose wisely 😌</p>
+
+    <div class="btnRow" id="btnRow">
+      <button class="yes" id="yesBtn">Yes 💞</button>
+      <button class="no" id="noBtn">No 🙈</button>
+    </div>
+
+    <div class="toast" id="toast"></div>
+    <div class="small">Made with love.</div>
+  </div>
+
+  <script>
+    // ✅ CHANGE THIS to your Formspree endpoint
+    const FORM_ENDPOINT = "https://formspree.io/f/mwvqnjek;
+
+    // Name from the URL: ?name=Negar
+    const params = new URLSearchParams(window.location.search);
+    const herName = params.get("name") || "my love";
+    const questionEl = document.getElementById("question");
+    questionEl.textContent = `Will you be my Valentine, ${herName}? 💘`;
+
+    // Optional: tag your link with a code: ?name=Negar&code=val2026
+    const linkCode = params.get("code") || "default";
+
+    const yesBtn = document.getElementById("yesBtn");
+    const noBtn  = document.getElementById("noBtn");
+    const toast  = document.getElementById("toast");
+    const btnRow = document.getElementById("btnRow");
+    const title  = document.querySelector("h1");
+
+    function showToast(msg){
+      toast.textContent = msg;
+      toast.classList.add("show");
+      setTimeout(() => toast.classList.remove("show"), 2500);
+    }
+
+    async function notifyYes(){
+      const payload = {
+        choice: "YES",
+        name: herName,
+        code: linkCode,
+        page: location.href,
+        time: new Date().toISOString()
+      };
+
+      try{
+        await fetch(FORM_ENDPOINT, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "Accept": "application/json" },
+          body: JSON.stringify(payload)
+        });
+      }catch(e){}
+    }
+
+    // YES = finish + notify you
+    yesBtn.addEventListener("click", async () => {
+      title.textContent = `YAAAY!! 💘`;
+      showToast(`Best answer 😌💖`);
+      yesBtn.disabled = true;
+      noBtn.disabled  = true;
+      await notifyYes();
+    });
+
+    // NO = wrong answer loop
+    noBtn.addEventListener("click", () => {
+      title.textContent = "❌ Wrong answer.";
+      showToast("But what if… 🫣👉🏻👈🏻 please 🥺💗");
+      // reset position so it stays playful forever
+      noBtn.style.left = "50%";
+      noBtn.style.top  = "0";
+      noBtn.style.transform = "translateX(70px)";
+    });
+
+    // Make NO dodge a bit
+    function moveNo(){
+      const rowRect = btnRow.getBoundingClientRect();
+      const maxX = Math.max(0, rowRect.width - noBtn.offsetWidth);
+      const x = Math.floor(Math.random() * maxX);
+      noBtn.style.left = x + "px";
+      noBtn.style.transform = "translateX(0)";
+    }
+    noBtn.addEventListener("mouseenter", moveNo);
+    noBtn.addEventListener("touchstart", moveNo, { passive: true });
+  </script>
+</body>
+</html>
