@@ -122,11 +122,12 @@
     }
 
     yesBtn.onclick = async () => {
-      showToast("YAAAY!! 💖💖💖");
-      yesBtn.disabled = true;
-      noBtn.disabled = true;
-      await notifyYes();
-    };
+  await notifyYes();
+
+  // ⬇️ redirect to the YAY page
+  window.location.href = "yay.html";
+};
+
 
     noBtn.onclick = () => {
       showToast("❌ Wrong answer. But what if… 🫣👉🏻👈🏻 please 🥺💗");
